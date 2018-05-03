@@ -1,0 +1,62 @@
+/* Variables */
+$backgroud-color: #FFF;
+$btn-arrow-color: #2196F3;
+
+/* Mixins */
+@mixin box-shadow($left, $top, $radius, $color) {
+	box-shadow: $left $top $radius $color;
+	-webkit-box-shadow: $left $top $radius $color;
+	-moz-box-shadow: $left $top $radius $color;
+}
+
+@mixin border-radius($radius) {
+	border-radius: $radius;
+	-webkit-border-radius: $radius;
+	-moz-border-radius: $radius;
+}
+
+html,
+body {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+#map {
+    height: 100%;
+}
+
+.container {
+    width: 100%;
+}
+
+.btn-up {
+    position: absolute;
+    display: block;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0 auto;
+    width: 50px;
+    height: 50px;
+    z-index: 2;
+    background-color: $backgroud-color;
+    text-align: center;
+    font-size: 2em;
+    padding: 6px 0;
+    color: $btn-arrow-color;
+    cursor: pointer;
+    @include border-radius(5px);
+    @include box-shadow(5px, 10px, 20px, rgba(0,0,0,0.23));
+
+    &:hover {
+        color: darken($btn-arrow-color, 25%);
+    }
+}

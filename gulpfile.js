@@ -10,12 +10,15 @@ var sass = require('gulp-sass');
 var paths = {
     src: 'src/**/*',
     srcHTML: 'src/**/*.html',
-    srcCSS: 'src/**/*.css',
+    srcCSS: 'src/**/*.scss',
     srcJS: 'src/**/*.js',
+    srcVendorJS: 'src/js/vendor/*.js',
+    srcAppJS: 'src/js/app.js',
     tmp: 'tmp',
     tmpIndex: 'tmp/index.html',
     tmpCSS: 'tmp/**/*.css',
-    tmpJS: 'tmp/**/*.js',
+    tmpJS: 'tmp/js/app.js',
+    tmpVendorJs: 'tmp/js/vendor/*.js',
     dist: 'dist',
     distStyle: 'dist/css',
     distScript: 'dist/js',
@@ -42,7 +45,7 @@ gulp.task('copy', ['html', 'css', 'js']);
 
 gulp.task('inject', ['copy'], function () {
     var css = gulp.src(paths.tmpCSS);
-    var js = gulp.src(paths.tmpJS);
+    var js = gulp.src([paths.tmpVendorJs, paths.tmpJS]);
     return gulp.src(paths.tmpIndex)
       .pipe(inject( css, { relative:true } ))
       .pipe(inject( js, { relative:true } ))
@@ -78,7 +81,7 @@ gulp.task('css:dist', function () {
 });
 
 gulp.task('js:dist', function () {
-    return gulp.src(paths.srcJS)
+    return gulp.src([paths.srcVendorJS, paths.srcAppJS])
         .pipe(concat('app.min.js'))
         .pipe(uglify())
         .pipe(gulp.dest(paths.distScript));
