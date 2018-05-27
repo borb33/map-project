@@ -12,9 +12,12 @@
 </head>
 <body>
     <div class="container">
-        <div class="btn-up"><a href="#" class="fas fa-arrow-up"></a></div>
+        <div class="list-container">
+            <div class="btn-down" data-bind="click:toogleContainer"><a href="#" class="fas fa-arrow-down"></a></div>
+        </div>
+        <div class="btn-up" data-bind="click:toogleContainer"><a href="#" class="fas fa-arrow-up"></a></div>
     </div>
-    <div id="map"></div>
+    <div id="map">Loading map...</div>
     <!--[htmlclean-protect]-->
     <!-- inject:js -->
     <!-- endinject -->

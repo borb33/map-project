@@ -7,3 +7,14 @@ var initMap = function() {
     });
 }
 
+// ViewModel
+var ViewModel = function() {
+    var self = this;
+
+    // Toogle to display or hide the list container
+    self.toogleContainer = function() {
+        $('.list-container').slideToggle('fast');
+    }
+}
+
+ko.applyBindings(new ViewModel());
