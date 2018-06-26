@@ -83,7 +83,7 @@ gulp.task('css:dist', function () {
 gulp.task('js:dist', function () {
     return gulp.src([paths.srcVendorJS, paths.srcAppJS])
         .pipe(concat('app.min.js'))
-        .pipe(uglify())
+        //.pipe(uglify())
         .pipe(gulp.dest(paths.distScript));
 });
 
