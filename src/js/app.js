@@ -70,12 +70,17 @@ var initMap = function() {
                 locations[marker.id]['image'] :
                 'images/blank.png';
 
+            // Set the description path if was already getted from the API
+            var description = locations[marker.id]['description'] !== null ?
+                locations[marker.id]['description'] :
+                'Loading description...';
+
             // Set the tile and base elements in the infowindow
             infoWindow.setContent(`
                 <div class="info-container">
                     <h2>`+marker.title+`</h2>
                     <img src="`+imageUrl+`" id="location-image" alt="`+marker.title+`">
-                    <p id="location-description">Loading description...</p>
+                    <p id="location-description">`+description+`</p>
                 </div>
             `);
             infoWindow.marker = marker;
@@ -100,6 +105,34 @@ var initMap = function() {
                     success: function(data) {
                         // Get the picture using the venue id received
                         getPicture(data.response.venues[0].id, marker.id);
+                    },
+                    error: function() {
+                        return false;
+                    }
+                });
+            }
+
+            // Check if the location item has the description otherwise
+            // get the information from the Wiki API
+            if(locations[marker.id]['description'] === null) {
+                $.ajax({
+                    url: 'https://en.wikipedia.org/w/api.php?action=opensearch&'+
+                            'search='+locations[marker.id]['title']+'&'+
+                            'format=json',
+                    dataType: 'jsonp',
+                    success: function(data) {
+                        // Get the result from api if not found set as null
+                        var descriptionApi = data[2][0] !== undefined ?
+                            data[2][0] : null;
+
+                        // Display the description in the infoWindow
+                        $('#location-description').text(
+                            descriptionApi!=null ? descriptionApi :
+                            'Unable to get the description for this location.'
+                        );
+
+                        // Save the description in the location object
+                        locations[marker.id]['description'] = descriptionApi;
                     },
                     error: function() {
                         return false;
