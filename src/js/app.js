@@ -7,22 +7,25 @@ var locations = [
         title: 'Buenos Aires Botanical Garden',
         originalName:'Jardín Botánico Carlos Thays',
         location: {lat: -34.582576,lng: -58.417388},
-        image : null,
-        description: null
+        image: null,
+        description: null,
+        id: 0
     },
     {
         title: 'MALBA',
         originalName:'MALBA',
         location: {lat: -34.577012,lng: -58.403330},
-        image : null,
-        description: null
+        image: null,
+        description: null,
+        id: 1
     },
     {
         title: 'National Museum of Decorative Arts',
         originalName:'Museo Nacional de Bellas Artes',
         location: {lat: -34.583780, lng: -58.392342},
         image : null,
-        description: null
+        description: null,
+        id: 2
     },
 ];
 
@@ -41,6 +44,7 @@ var initMap = function() {
         // Get the title and the position
         var title = locations[i].title;
         var location = locations[i].location;
+        var id = locations[i].id;
 
         // Create the markers and put them into the array markers
         var marker = new google.maps.Marker({
@@ -48,7 +52,7 @@ var initMap = function() {
             map: map,
             title: title,
             animation: google.maps.Animation.DROP,
-            id: i
+            id: id
         });
         markers.push(marker);
 
@@ -65,15 +69,16 @@ var initMap = function() {
         // Check if is not already open
         if(marker != infoWindow.marker) {
 
+            // Find the location by the id
+            var location = locations.filter((location) => location['id'] === marker.id);
+
             // Set the image path if was already getted from API
-            var imageUrl = locations[marker.id]['image'] !== null ?
-                locations[marker.id]['image'] :
-                'images/blank.png';
+            var imageUrl = location[0]['image'] !== null ?
+                location[0]['image'] : 'images/blank.png';
 
             // Set the description path if was already getted from the API
-            var description = locations[marker.id]['description'] !== null ?
-                locations[marker.id]['description'] :
-                'Loading description...';
+            var description = location[0]['description'] !== null ?
+                location[0]['description'] : 'Loading description...';
 
             // Set the tile and base elements in the infowindow
             infoWindow.setContent(`
@@ -88,19 +93,19 @@ var initMap = function() {
             // Clear the marker property when the infowindow is closed
             infoWindow.addListener('closeclick', function() {
                 infoWindow.marker = null;
-            })
+            });
 
             // Check if the location item has an image otherwise
             // get the information from the Foursquare API
-            if(locations[marker.id]['image'] === null) {
-                var markerLocation = locations[marker.id].location;
+            if(location[0]['image'] === null) {
+                var markerLocation = location[0].location;
                 $.ajax({
                     url: 'https://api.foursquare.com/v2/venues/search?'+
                             'll='+markerLocation.lat+','+markerLocation.lng+'&'+
                             'client_id=KOO1EUSAY50U1VPWO4S51XAQQQWBEDSC2VMUGBYER25AW5T2&'+
                             'client_secret=M04BBX5TH4EWRN22OPIPYLYZBO0LHFJS0CGJXRD1EBMH4DOY&'+
                             'v=20180801&'+
-                            'query='+locations[marker.id]['originalName'],
+                            'query='+location[0]['originalName'],
                     dataType: 'json',
                     success: function(data) {
                         // Get the picture using the venue id received
@@ -114,10 +119,10 @@ var initMap = function() {
 
             // Check if the location item has the description otherwise
             // get the information from the Wiki API
-            if(locations[marker.id]['description'] === null) {
+            if(location[0]['description'] === null) {
                 $.ajax({
                     url: 'https://en.wikipedia.org/w/api.php?action=opensearch&'+
-                            'search='+locations[marker.id]['title']+'&'+
+                            'search='+locations[0]['title']+'&'+
                             'format=json',
                     dataType: 'jsonp',
                     success: function(data) {
@@ -132,7 +137,7 @@ var initMap = function() {
                         );
 
                         // Save the description in the location object
-                        locations[marker.id]['description'] = descriptionApi;
+                        location[0]['description'] = descriptionApi;
                     },
                     error: function() {
                         return false;
@@ -165,8 +170,11 @@ var initMap = function() {
                     locationUrl != null ? locationUrl : 'images/blank.png'
                 );
 
+                // Find the location by the id
+                var location = locations.filter((location) => location['id'] === locationId);
+
                 // Save the url in the location object
-                locations[locationId]['image'] = locationUrl;
+                location[0]['image'] = locationUrl;
             },
             error: function() {
                 return false;
@@ -184,6 +192,22 @@ var ViewModel = function() {
         $('.list-container').slideToggle('fast');
     };
 
+    // Display the locations in the list container
+    self.locationList = ko.observableArray([]);
+    locations.forEach(function(item){
+        self.locationList.push(new Location(item));
+    });
+
+}
+
+// Location Model
+var Location = function(data) {
+    this.title = ko.observable(data.title);
+    this.originalName = ko.observable(data.originalName);
+    this.location = ko.observable(data.location);
+    this.image = ko.observable(data.image);
+    this.description = ko.observable(data.description);
+    this.id = ko.observable(data.id);
 }
 
 ko.applyBindings(new ViewModel());
