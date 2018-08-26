@@ -9,14 +9,17 @@
     <!-- inject:css -->
     <!-- endinject -->
     <!--[/htmlclean-protect]-->
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="list-container">
             <div class="btn-down" data-bind="click:toogleContainer"><a href="#" class="fas fa-arrow-down"></a></div>
-            <ul id="location-list" data-bind="foreach: locationList">
-                <li data-bind="text: title"></li>
-            </ul>
+            <div class="inner-container">
+                <ul id="location-list" data-bind="foreach: locationList">
+                    <li data-bind="text: title"></li>
+                </ul>
+            </div>
         </div>
         <div class="btn-up" data-bind="click:toogleContainer"><a href="#" class="fas fa-arrow-up"></a></div>
     </div>

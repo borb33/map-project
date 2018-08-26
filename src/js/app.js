@@ -165,7 +165,7 @@ var initMap = function() {
 
                 // Set the picture in the infowindow img tag
                 var locationUrl = venuePhoto != undefined ?
-                    venuePhoto.prefix+'200x100'+venuePhoto.suffix : null;
+                    venuePhoto.prefix+'280x200'+venuePhoto.suffix : null;
                 $('#location-image').attr('src',
                     locationUrl != null ? locationUrl : 'images/blank.png'
                 );
