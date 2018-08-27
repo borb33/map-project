@@ -17,7 +17,7 @@
             <div class="btn-down" data-bind="click:toogleContainer"><a href="#" class="fas fa-arrow-down"></a></div>
             <div class="inner-container">
                 <ul id="location-list" data-bind="foreach: locationList">
-                    <li data-bind="text: title"></li>
+                    <li data-bind="text: title, click: $parent.openMarkerLocation, attr: { 'data-id': id }"></li>
                 </ul>
             </div>
         </div>

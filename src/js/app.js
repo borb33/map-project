@@ -1,6 +1,8 @@
 // Create empty array of markers
 var markers = [];
 
+var markerInfowindow;
+
 // Set the default locations that will be displayed in the map
 var locations = [
     {
@@ -37,7 +39,7 @@ var initMap = function() {
         center: {lat: -34.587066, lng: -58.426996}
     });
 
-    var markerInfowindow = new google.maps.InfoWindow();
+    markerInfowindow = new google.maps.InfoWindow();
 
     // Create an array of markers based on the locations
     for(var i=0; i<locations.length; i++) {
@@ -61,126 +63,126 @@ var initMap = function() {
             openInfoWindow(this, markerInfowindow);
         });
     }
+}
 
-    // Open an infoWindow with the information of the marker
-    // when is clicked
-    var openInfoWindow = function(marker, infoWindow) {
+// Open an infoWindow with the information of the marker
+// when is clicked
+var openInfoWindow = function(marker, infoWindow) {
 
-        // Check if is not already open
-        if(marker != infoWindow.marker) {
+    // Check if is not already open
+    if(marker != infoWindow.marker) {
+
+        // Find the location by the id
+        var location = locations.filter((location) => location['id'] === marker.id);
+
+        // Set the image path if was already getted from API
+        var imageUrl = location[0]['image'] !== null ?
+            location[0]['image'] : 'images/blank.png';
+
+        // Set the description path if was already getted from the API
+        var description = location[0]['description'] !== null ?
+            location[0]['description'] : 'Loading description...';
+
+        // Set the tile and base elements in the infowindow
+        infoWindow.setContent(`
+            <div class="info-container">
+                <h2>`+marker.title+`</h2>
+                <img src="`+imageUrl+`" id="location-image" alt="`+marker.title+`">
+                <p id="location-description">`+description+`</p>
+            </div>
+        `);
+        infoWindow.marker = marker;
+
+        // Clear the marker property when the infowindow is closed
+        infoWindow.addListener('closeclick', function() {
+            infoWindow.marker = null;
+        });
+
+        // Check if the location item has an image otherwise
+        // get the information from the Foursquare API
+        if(location[0]['image'] === null) {
+            var markerLocation = location[0].location;
+            $.ajax({
+                url: 'https://api.foursquare.com/v2/venues/search?'+
+                        'll='+markerLocation.lat+','+markerLocation.lng+'&'+
+                        'client_id=KOO1EUSAY50U1VPWO4S51XAQQQWBEDSC2VMUGBYER25AW5T2&'+
+                        'client_secret=M04BBX5TH4EWRN22OPIPYLYZBO0LHFJS0CGJXRD1EBMH4DOY&'+
+                        'v=20180801&'+
+                        'query='+location[0]['originalName'],
+                dataType: 'json',
+                success: function(data) {
+                    // Get the picture using the venue id received
+                    getPicture(data.response.venues[0].id, marker.id);
+                },
+                error: function() {
+                    return false;
+                }
+            });
+        }
+
+        // Check if the location item has the description otherwise
+        // get the information from the Wiki API
+        if(location[0]['description'] === null) {
+            $.ajax({
+                url: 'https://en.wikipedia.org/w/api.php?action=opensearch&'+
+                        'search='+locations[0]['title']+'&'+
+                        'format=json',
+                dataType: 'jsonp',
+                success: function(data) {
+                    // Get the result from api if not found set as null
+                    var descriptionApi = data[2][0] !== undefined ?
+                        data[2][0] : null;
+
+                    // Display the description in the infoWindow
+                    $('#location-description').text(
+                        descriptionApi!=null ? descriptionApi :
+                        'Unable to get the description for this location.'
+                    );
+
+                    // Save the description in the location object
+                    location[0]['description'] = descriptionApi;
+                },
+                error: function() {
+                    return false;
+                }
+            });
+        }
+
+        // Open the infowindow
+        infoWindow.open(map, marker);
+    }
+}
+
+// This function will return the picture url from Foursquare API
+// using the venue id provided, then set the url into the img tag and
+// save the result url in the location object
+var getPicture = function(venueId, locationId) {
+    $.ajax({
+        url: 'https://api.foursquare.com/v2/venues/'+venueId+'/photos?'+
+                'client_id=KOO1EUSAY50U1VPWO4S51XAQQQWBEDSC2VMUGBYER25AW5T2&'+
+                'client_secret=M04BBX5TH4EWRN22OPIPYLYZBO0LHFJS0CGJXRD1EBMH4DOY&'+
+                'v=20180801',
+        dataType: 'json',
+        success: function(data) {
+            var venuePhoto = data.response.photos.items[0];
+
+            // Set the picture in the infowindow img tag
+            var locationUrl = venuePhoto != undefined ?
+                venuePhoto.prefix+'280x200'+venuePhoto.suffix : null;
+            $('#location-image').attr('src',
+                locationUrl != null ? locationUrl : 'images/blank.png'
+            );
 
             // Find the location by the id
-            var location = locations.filter((location) => location['id'] === marker.id);
+            var location = locations.filter((location) => location['id'] === locationId);
 
-            // Set the image path if was already getted from API
-            var imageUrl = location[0]['image'] !== null ?
-                location[0]['image'] : 'images/blank.png';
-
-            // Set the description path if was already getted from the API
-            var description = location[0]['description'] !== null ?
-                location[0]['description'] : 'Loading description...';
-
-            // Set the tile and base elements in the infowindow
-            infoWindow.setContent(`
-                <div class="info-container">
-                    <h2>`+marker.title+`</h2>
-                    <img src="`+imageUrl+`" id="location-image" alt="`+marker.title+`">
-                    <p id="location-description">`+description+`</p>
-                </div>
-            `);
-            infoWindow.marker = marker;
-
-            // Clear the marker property when the infowindow is closed
-            infoWindow.addListener('closeclick', function() {
-                infoWindow.marker = null;
-            });
-
-            // Check if the location item has an image otherwise
-            // get the information from the Foursquare API
-            if(location[0]['image'] === null) {
-                var markerLocation = location[0].location;
-                $.ajax({
-                    url: 'https://api.foursquare.com/v2/venues/search?'+
-                            'll='+markerLocation.lat+','+markerLocation.lng+'&'+
-                            'client_id=KOO1EUSAY50U1VPWO4S51XAQQQWBEDSC2VMUGBYER25AW5T2&'+
-                            'client_secret=M04BBX5TH4EWRN22OPIPYLYZBO0LHFJS0CGJXRD1EBMH4DOY&'+
-                            'v=20180801&'+
-                            'query='+location[0]['originalName'],
-                    dataType: 'json',
-                    success: function(data) {
-                        // Get the picture using the venue id received
-                        getPicture(data.response.venues[0].id, marker.id);
-                    },
-                    error: function() {
-                        return false;
-                    }
-                });
-            }
-
-            // Check if the location item has the description otherwise
-            // get the information from the Wiki API
-            if(location[0]['description'] === null) {
-                $.ajax({
-                    url: 'https://en.wikipedia.org/w/api.php?action=opensearch&'+
-                            'search='+locations[0]['title']+'&'+
-                            'format=json',
-                    dataType: 'jsonp',
-                    success: function(data) {
-                        // Get the result from api if not found set as null
-                        var descriptionApi = data[2][0] !== undefined ?
-                            data[2][0] : null;
-
-                        // Display the description in the infoWindow
-                        $('#location-description').text(
-                            descriptionApi!=null ? descriptionApi :
-                            'Unable to get the description for this location.'
-                        );
-
-                        // Save the description in the location object
-                        location[0]['description'] = descriptionApi;
-                    },
-                    error: function() {
-                        return false;
-                    }
-                });
-            }
-
-            // Open the infowindow
-            infoWindow.open(map, marker);
+            // Save the url in the location object
+            location[0]['image'] = locationUrl;
+        },
+        error: function() {
+            return false;
         }
-    }
-
-    // This function will return the picture url from Foursquare API
-    // using the venue id provided, then set the url into the img tag and
-    // save the result url in the location object
-    var getPicture = function(venueId, locationId) {
-        $.ajax({
-            url: 'https://api.foursquare.com/v2/venues/'+venueId+'/photos?'+
-                    'client_id=KOO1EUSAY50U1VPWO4S51XAQQQWBEDSC2VMUGBYER25AW5T2&'+
-                    'client_secret=M04BBX5TH4EWRN22OPIPYLYZBO0LHFJS0CGJXRD1EBMH4DOY&'+
-                    'v=20180801',
-            dataType: 'json',
-            success: function(data) {
-                var venuePhoto = data.response.photos.items[0];
-
-                // Set the picture in the infowindow img tag
-                var locationUrl = venuePhoto != undefined ?
-                    venuePhoto.prefix+'280x200'+venuePhoto.suffix : null;
-                $('#location-image').attr('src',
-                    locationUrl != null ? locationUrl : 'images/blank.png'
-                );
-
-                // Find the location by the id
-                var location = locations.filter((location) => location['id'] === locationId);
-
-                // Save the url in the location object
-                location[0]['image'] = locationUrl;
-            },
-            error: function() {
-                return false;
-            }
-        });
-    }
+    });
 }
 
 // ViewModel
@@ -197,6 +199,16 @@ var ViewModel = function() {
     locations.forEach(function(item){
         self.locationList.push(new Location(item));
     });
+
+    // Open infowindow on click
+    self.openMarkerLocation = function(data, event) {
+        var locationId = event.target.getAttribute('data-id');
+        var marker = markers.filter((marker) => marker.id === parseInt(locationId));
+
+        self.toogleContainer();
+
+        openInfoWindow(marker[0], markerInfowindow);
+    };
 
 }
 
