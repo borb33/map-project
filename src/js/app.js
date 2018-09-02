@@ -2,6 +2,7 @@
 var markers = [];
 
 var markerInfowindow;
+var map;
 
 // Set the default locations that will be displayed in the map
 var locations = [
@@ -34,7 +35,7 @@ var locations = [
 // Callback function from Google maps api
 // Creates a new map with the location of Buenos Aires, Argentina
 var initMap = function() {
-    const map = new google.maps.Map(document.getElementById('map'), {
+    map = new google.maps.Map(document.getElementById('map'), {
         zoom: 14,
         center: {lat: -34.587066, lng: -58.426996}
     });
@@ -125,7 +126,7 @@ var openInfoWindow = function(marker, infoWindow) {
         if(location[0]['description'] === null) {
             $.ajax({
                 url: 'https://en.wikipedia.org/w/api.php?action=opensearch&'+
-                        'search='+locations[0]['title']+'&'+
+                        'search='+location[0]['title']+'&'+
                         'format=json',
                 dataType: 'jsonp',
                 success: function(data) {
@@ -147,6 +148,9 @@ var openInfoWindow = function(marker, infoWindow) {
                 }
             });
         }
+
+        // Center marker
+        map.setCenter(marker.getPosition());
 
         // Open the infowindow
         infoWindow.open(map, marker);
@@ -200,6 +204,37 @@ var ViewModel = function() {
         self.locationList.push(new Location(item));
     });
 
+    self.filterValue = ko.observable();
+
+    // Filter the locations with the input inserted
+    self.filterValue.subscribe(function() {
+        var locationsFiltered = locations.filter((e) => {
+            return e.title.toLowerCase().indexOf(self.filterValue().toLowerCase()) !== -1;
+        });
+
+        // Display only filtered locations
+        self.locationList([]);
+        locationsFiltered.forEach(function(item){
+            self.locationList.push(new Location(item));
+        });
+
+        // Filter the markers
+        for(var marker of markers) {
+            for(var location of locationsFiltered) {
+                if(location.id === marker.id) {
+                    marker.setMap(map);
+                    break;
+                } else {
+                    marker.setMap(null);
+                }
+            }
+
+            if(locationsFiltered.length === 0) {
+                marker.setMap(null);
+            }
+        }
+
+    })
     // Open infowindow on click
     self.openMarkerLocation = function(data, event) {
         var locationId = event.target.getAttribute('data-id');
