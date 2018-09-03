@@ -32,6 +32,54 @@ var locations = [
         description: null,
         id: 2
     },
+    {
+        title: 'Galileo Galilei Planetarium',
+        originalName:'Planetario Galileo Galilei',
+        location: {lat: -34.5696819, lng: -58.4118694},
+        image : null,
+        description: null,
+        id: 3
+    },
+    {
+        title: 'La Recoleta Cemetery',
+        originalName:'Cementerio de la Recoleta',
+        location: {lat: -34.5874469, lng: -58.3935573},
+        image : null,
+        description: null,
+        id: 4
+    },
+    {
+        title: 'Buenos Aires Japanese Gardens',
+        originalName:'Jardín Japonés',
+        location: {lat: -34.5761405, lng: -58.4097573},
+        image : null,
+        description: null,
+        id: 5
+    },
+    {
+        title: 'El Ateneo Grand Splendid',
+        originalName:'El Ateneo Grand Splendid',
+        location: {lat: -34.5960076, lng: -58.3942915},
+        image : null,
+        description: null,
+        id: 6
+    },
+    {
+        title: 'Casa Rosada',
+        originalName:'Casa Rosada',
+        location: {lat: -34.6079866, lng: -58.3704149},
+        image : null,
+        description: null,
+        id: 7
+    },
+    {
+        title: 'Teatro Colón',
+        originalName:'Teatro Colón',
+        location: {lat: -34.6009865, lng: -58.3832177},
+        image : null,
+        description: null,
+        id: 8
+    },
 ];
 
 // Callback function from Google maps api
@@ -108,6 +156,7 @@ var openInfoWindow = function(marker, infoWindow) {
             <div class="info-container">
                 <h2>`+marker.title+`</h2>
                 <img src="`+imageUrl+`" id="location-image" alt="`+marker.title+`">
+                <p class="image-credit">Image provided by Foursquare API</p>
                 <p id="location-description">`+description+`</p>
             </div>
         `);

@@ -106,11 +106,16 @@ body {
         width: 280px;
         height: 200px;
     }
+
+    .image-credit {
+        font-size: 0.7em;
+    }
 }
 
 /*  List container styles */
 .inner-container {
     width: 100%;
+    height: calc(100% - 125px);
 
     @include desktop {
         width: 1024px;
@@ -121,6 +126,8 @@ body {
         list-style: none;
         margin: 0;
         padding: 0;
+        height: 100%;
+        overflow: scroll;
 
         li{
             display: block;
