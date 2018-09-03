@@ -3,6 +3,8 @@ var markers = [];
 
 var markerInfowindow;
 var map;
+var defaultIcon;
+var highlightIcon;
 
 // Set the default locations that will be displayed in the map
 var locations = [
@@ -42,6 +44,22 @@ var initMap = function() {
 
     markerInfowindow = new google.maps.InfoWindow();
 
+    defaultIcon = new google.maps.MarkerImage(
+        'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|34738f'+
+        '|40|_|%E2%80%A2',
+        new google.maps.Size(21, 34),
+        new google.maps.Point(0, 0),
+        new google.maps.Point(10, 34),
+        new google.maps.Size(21,34));
+
+    highlightIcon = new google.maps.MarkerImage(
+        'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|be3e2b'+
+        '|40|_|%E2%80%A2',
+        new google.maps.Size(31, 51),
+        new google.maps.Point(0, 0),
+        new google.maps.Point(10, 34),
+        new google.maps.Size(31,51));
+
     // Create an array of markers based on the locations
     for(var i=0; i<locations.length; i++) {
         // Get the title and the position
@@ -55,7 +73,8 @@ var initMap = function() {
             map: map,
             title: title,
             animation: google.maps.Animation.DROP,
-            id: id
+            id: id,
+            icon: defaultIcon
         });
         markers.push(marker);
 
@@ -92,11 +111,21 @@ var openInfoWindow = function(marker, infoWindow) {
                 <p id="location-description">`+description+`</p>
             </div>
         `);
+
+        // Set highlight icon when is pressed
+        for(var markerItem of markers) {
+            markerItem.setIcon(defaultIcon);
+        }
+        marker.setIcon(highlightIcon);
+
         infoWindow.marker = marker;
 
         // Clear the marker property when the infowindow is closed
         infoWindow.addListener('closeclick', function() {
             infoWindow.marker = null;
+            for(var markerItem of markers) {
+                markerItem.setIcon(defaultIcon);
+            }
         });
 
         // Check if the location item has an image otherwise
@@ -200,11 +229,17 @@ var ViewModel = function() {
 
     // Display the locations in the list container
     self.locationList = ko.observableArray([]);
-    locations.forEach(function(item){
+    locations.forEach(function(item) {
         self.locationList.push(new Location(item));
     });
 
     self.filterValue = ko.observable();
+    self.activeLocation = ko.observable();
+
+    // Check if the location is active
+    self.isLocationChosen = function(item) {
+        return self.activeLocation() === item;
+    }
 
     // Filter the locations with the input inserted
     self.filterValue.subscribe(function() {
@@ -214,7 +249,7 @@ var ViewModel = function() {
 
         // Display only filtered locations
         self.locationList([]);
-        locationsFiltered.forEach(function(item){
+        locationsFiltered.forEach(function(item) {
             self.locationList.push(new Location(item));
         });
 
@@ -241,6 +276,8 @@ var ViewModel = function() {
         var marker = markers.filter((marker) => marker.id === parseInt(locationId));
 
         self.toogleContainer();
+
+        self.activeLocation(data);
 
         openInfoWindow(marker[0], markerInfowindow);
     };

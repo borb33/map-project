@@ -135,7 +135,7 @@ body {
 
             &:hover {
                 color: $white;
-                background-color: $blue;
+                background-color: darken($blue, 10%);
                 border-bottom: solid 1px $white;
             }
 
@@ -148,8 +148,15 @@ body {
                 text-align: center;
             }
         }
+        .active {
+            color: $white;
+            background-color: $blue;
+            border-bottom: solid 1px $white;
+        }
     }
 }
+
+
 
 /* Input field */
 .input-text {

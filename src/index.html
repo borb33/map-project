@@ -18,7 +18,8 @@
             <div class="inner-container">
                 <input type="text" class="input-text" placeholder="Filter location" data-bind="textInput: filterValue">
                 <ul id="location-list" data-bind="foreach: locationList">
-                    <li data-bind="text: title, click: $parent.openMarkerLocation, attr: { 'data-id': id }"></li>
+                    <li data-bind="text: title, click: $parent.openMarkerLocation, attr: { 'data-id': id },
+                    css: {active: $parent.isLocationChosen($data)}"></li>
                 </ul>
             </div>
         </div>
