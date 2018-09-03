@@ -110,6 +110,11 @@ body {
     .image-credit {
         font-size: 0.7em;
     }
+
+    a {
+        text-decoration: none;
+        color: $blue;
+    }
 }
 
 /*  List container styles */

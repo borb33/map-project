@@ -208,12 +208,18 @@ var openInfoWindow = function(marker, infoWindow) {
                         'format=json',
                 dataType: 'jsonp',
                 success: function(data) {
+                    console.log(data);
                     // Get the result from api if not found set as null
                     var descriptionApi = data[2][0] !== undefined ?
                         data[2][0] : null;
 
+                    if(descriptionApi !== null) {
+                        descriptionApi += ' <a href="'+ data[3][0] +
+                            '" target="_blank">Wikipedia</a>';
+                    }
+
                     // Display the description in the infoWindow
-                    $('#location-description').text(
+                    $('#location-description').html(
                         descriptionApi!=null ? descriptionApi :
                         'Unable to get the description for this location.'
                     );
